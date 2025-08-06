@@ -3,10 +3,18 @@
 //
 
 #include "WebSocketManager.hpp"
-#include <boost/beast.hpp>
 
-WebSocketManager::WebSocketManager(const string& url_) : url( url_ ) {}
+#include <cstdlib>
+#include <iostream>
+#include <memory>
+#include <string>
+
+
+WebSocketManager::WebSocketManager(string urlBase_,
+                                   string apiKey_): urlBase{std::move( urlBase_ )},
+                                                    apiKey{std::move( apiKey_ )} {}
 
 void WebSocketManager::establishConnection() {
 
 }
+

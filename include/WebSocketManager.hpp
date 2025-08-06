@@ -1,17 +1,17 @@
-#ifndef WEBSOCKETMANAGER_HPP
-#define WEBSOCKETMANAGER_HPP
+#pragma once
+
 #include <string>
+
 using string = std::string;
 
 class WebSocketManager {
 private:
-    string url;
+    string urlBase;
+    string apiKey;
 
 public:
-    explicit WebSocketManager(const string& url);
+    explicit WebSocketManager(string urlBase, string apiKey);
 
     void establishConnection();
     void disconnectConnection();
 };
-
-#endif //WEBSOCKETMANAGER_HPP

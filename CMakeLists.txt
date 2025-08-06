@@ -8,9 +8,10 @@ string(APPEND CMAKE_CXX_FLAGS " -Wall -Werror -Wpedantic -Wshadow -Wconversion")
 string(APPEND CMAKE_CXX_FLAGS " -Wnull-dereference -Wdouble-promotion")
 string(APPEND CMAKE_CXX_FLAGS " -flto -march=native -g")
 
+find_package(OpenSSL REQUIRED)
+
 set(SOURCES
-    src/hello_world.cpp
-    src/main.cpp
+        src/main.cpp
         src/WebSocketManager.cpp
 )
 
