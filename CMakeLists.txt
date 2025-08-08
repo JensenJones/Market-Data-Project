@@ -11,11 +11,13 @@ string(APPEND CMAKE_CXX_FLAGS " -flto -march=native -g")
 find_package(OpenSSL REQUIRED)
 
 set(SOURCES
-        src/main.cpp
-        src/WebSocketManager.cpp
+    src/main.cpp
+    src/WebSocketManager.cpp
 )
 
-add_executable(market_data  ${SOURCES})
+find_package(Boost REQUIRED)
+
+add_executable(market_data ${SOURCES})
 
 target_include_directories(market_data
     PRIVATE
