@@ -9,17 +9,22 @@ string(APPEND CMAKE_CXX_FLAGS " -Wnull-dereference -Wdouble-promotion")
 string(APPEND CMAKE_CXX_FLAGS " -flto -march=native -g")
 
 find_package(OpenSSL REQUIRED)
+find_package(Boost REQUIRED COMPONENTS headers)
 
 set(SOURCES
     src/main.cpp
     src/WebSocketManager.cpp
 )
 
-find_package(Boost REQUIRED)
-
 add_executable(market_data ${SOURCES})
 
 target_include_directories(market_data
     PRIVATE
         ${PROJECT_SOURCE_DIR}/include
+)
+
+target_link_libraries(market_data
+    PRIVATE
+        Boost::Boost
+        OpenSSL::SSL
 )
