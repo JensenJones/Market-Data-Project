@@ -23,9 +23,3 @@ target_include_directories(market_data
         ${PROJECT_SOURCE_DIR}/include
         ${Boost_INCLUDE_DIRS}
 )
-
-target_link_libraries(market_data
-    PRIVATE
-        Boost::Boost
-        OpenSSL::SSL
-)
