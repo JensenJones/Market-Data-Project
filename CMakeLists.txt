@@ -15,9 +15,7 @@ set(SOURCES
     src/WebSocketManager.cpp
 )
 
-find_package(Boost REQUIRED)
-
-add_executable(market_data ${SOURCES})
+add_executable(market_data  ${SOURCES})
 
 target_include_directories(market_data
     PRIVATE

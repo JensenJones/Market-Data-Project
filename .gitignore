@@ -1,23 +1,4 @@
-# Build directories
-/build/
-/cmake-build-debug/
+build/*
+!build/.gitkeep
 
-# CMake files
-CMakeCache.txt
-CMakeFiles/
-cmake_install.cmake
-Makefile
-
-# Object files and binaries
-*.o
-*.obj
-*.so
-*.a
-*.out
-*.exe
-
-# Editor/IDE files
-*.swp
-*.DS_Store
-*.vscode/
-.idea/
+.idea
