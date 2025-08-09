@@ -21,10 +21,5 @@ add_executable(market_data ${SOURCES})
 target_include_directories(market_data
     PRIVATE
         ${PROJECT_SOURCE_DIR}/include
-)
-
-target_link_libraries(market_data
-    PRIVATE
-        Boost::Boost
-        OpenSSL::SSL
+        ${Boost_INCLUDE_DIRS}
 )
