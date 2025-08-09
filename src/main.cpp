@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include "WebSocketManager.hpp"
-#include <boost/beast.hpp>
 
 std::string urlBase = "wss://data-streamer.coindesk.com/?api_key=$";
 
