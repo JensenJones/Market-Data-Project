@@ -179,5 +179,11 @@
   }, {
     "name" : "vcpkg-cmake",
     "version>=" : "2024-04-23"
+  }, {
+    "name" : "boost-thread",
+    "version>=" : "1.88.0"
+  }, {
+    "name" : "openssl",
+    "version>=" : "3.5.1"
   } ]
 }

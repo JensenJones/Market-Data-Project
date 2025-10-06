@@ -4,19 +4,26 @@ project(Market-Data-Project)
 
 set(CMAKE_CXX_STANDARD 23)
 
-string(APPEND CMAKE_CXX_FLAGS " -Wall -Werror -Wpedantic -Wshadow -Wconversion")
-string(APPEND CMAKE_CXX_FLAGS " -Wnull-dereference -Wdouble-promotion")
-string(APPEND CMAKE_CXX_FLAGS " -flto -march=native -g")
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
+
+#string(APPEND CMAKE_CXX_FLAGS " -Wall -Werror -Wpedantic -Wshadow -Wconversion")
+#string(APPEND CMAKE_CXX_FLAGS " -Wnull-dereference -Wdouble-promotion")
+string(APPEND CMAKE_CXX_FLAGS " -march=native -g")
 
 find_package(OpenSSL REQUIRED)
 find_package(Boost REQUIRED COMPONENTS headers)
 
 set(SOURCES
-    src/main.cpp
-    src/WebSocketManager.cpp
+        src/WebSocketClient.cpp
 )
 
 add_executable(market_data ${SOURCES})
+
+target_link_libraries(market_data
+        PRIVATE
+        OpenSSL::SSL
+        OpenSSL::Crypto
+)
 
 target_include_directories(market_data
     PRIVATE
