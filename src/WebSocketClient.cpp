@@ -1,9 +1,8 @@
 /**
- * Sravz LLC
  * TODO:
- * Implement lock free datastructure instead of _buffer so strand can be removed on on_read
- * Implement JSON parser for the message
- * Upload the JSON quotes/trades to redis
+ * Create simple market greeks
+ * Interface for combining the greeks and trading based on boolean combination of them
+ * Interchangeability of markets while running.
  **/
 
 #include <boost/beast/core.hpp>
@@ -19,9 +18,13 @@
 #include <thread>
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
+#include <nlohmann/adl_serializer.hpp>
+#include <nlohmann/json.hpp>
 #include <openssl/ssl.h>
 
 #include "MarketDataHandler.hpp"
+#include "messageQueue.hpp"
+#include "TopOfBook.hpp"
 
 
 namespace beast = boost::beast; // from <boost/beast.hpp>
@@ -55,6 +58,7 @@ private:
     std::string endpoint_;
     strand ws_strand_;
     MarketDataHandler marketDataHandler_;
+    messageQueue::MessageQueue<TopOfBook> messageQueue;
 
 public:
     // Resolver and socket require an io_context
@@ -219,16 +223,17 @@ public:
         boost::ignore_unused(bytes_transferred);
         if (ec) return fail(ec, "read");
 
-        // Convert buffer_ -> string (exact bytes)
-        std::string message = beast::buffers_to_string(buffer_.data());
+        if (std::string message = beast::buffers_to_string(buffer_.data()); message.length() > 30) { // Avoid invalid messages
+            messageQueue.enqueue(std::move(TopOfBook{nlohmann::json::parse(message)}));
+        }
         buffer_.consume(buffer_.size());
 
-        if (message.at(19) == 'd') {
-            std::printf("message: %s", message.c_str());
-            MarketDepthMessage marketDepthMessage{message};
-            marketDataHandler_.consumeMarketData(marketDepthMessage);
-            marketDepthMessage.printMarketDepth();
-        }
+        // // Market Depth Stream messages:
+        // if (message.at(19) == 'd') {
+        //     MarketDepthMessage marketDepthMessage{message};
+        //     marketDataHandler_.consumeMarketData(marketDepthMessage);
+        //     marketDepthMessage.printMarketDepth();
+        // }
 
         ws_.async_read(
             buffer_,
@@ -263,6 +268,9 @@ int main(int argc, char **argv) {
                 "    stream.binance.com 9443 '{ \"method\": \"SUBSCRIBE\", \"params\": [ \"btcusdt@aggTrade\", \"btcusdt@depth\" ], \"id\": 1 }' \"/stream?streams=btcusdt@trade&timeUnit=MILLISECOND\" 1\n";
         return EXIT_FAILURE;
     }
+
+    // TODO: look into the 'Individual Symbol Rolling Window Statistics Streams'
+
     auto const host = argv[1];
     auto const port = argv[2];
     auto const text = argv[3];

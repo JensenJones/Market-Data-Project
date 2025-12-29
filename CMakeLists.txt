@@ -25,6 +25,9 @@ set(SOURCES
         src/MarketDepthMessage.cpp
         include/OrderFactory.hpp
         src/OrderFactory.cpp
+        include/TopOfBook.hpp
+        src/TopOfBook.cpp
+        include/MessageQueue.hpp
 )
 
 add_executable(market_data ${SOURCES})

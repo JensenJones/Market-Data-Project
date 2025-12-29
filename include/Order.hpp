@@ -1,4 +1,5 @@
 #pragma once
+#include <ostream>
 
 class Order {
     double price;
@@ -8,7 +9,13 @@ public:
     Order();
     Order(double price, double quantity);
 
-    double getPrice() const;
+    void set_price(double newPrice);
+    void set_quantity(double newQuantity);
 
-    double getQuantity() const;
+    [[nodiscard]] double getPrice() const;
+    [[nodiscard]] double getQuantity() const;
+
+    friend std::ostream & operator<<(std::ostream &os, const Order &obj) {
+        return os << std::format("{:6.6f} x {:2.6f}", obj.price, obj.quantity);
+    }
 };

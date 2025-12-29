@@ -9,7 +9,7 @@ private:
     std::vector<Order> bids;
     std::vector<Order> asks;
 
-    static std::vector<std::string> splitStringOnQuotes(const std::string& s);
+    static std::vector<std::string> splitStringOnDelim(const std::string& s, const char delim);
 
 public:
     explicit MarketDepthMessage(const std::string& message);
