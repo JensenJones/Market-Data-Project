@@ -16,10 +16,7 @@ public:
 
     friend std::ostream & operator<<(std::ostream &os, const TopOfBook &obj) {
         return os
-               << "updateId: " << obj.updateId
-               << " symbol: " << obj.symbol
-               << " bestBid: " << obj.bestBid
-               << " | "
-               << " bestAsk: " << obj.bestAsk;
+               << "updateId: " << obj.updateId << ", symbol: " << obj.symbol << '\n'
+               << "Top of order book: " << obj.bestBid << " | " << obj.bestAsk;
     }
 };
