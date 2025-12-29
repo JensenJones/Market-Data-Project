@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.31.6)
 
-project(Market-Data-Project)
+project(Market-Data-Project LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
 
@@ -10,11 +11,20 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
 #string(APPEND CMAKE_CXX_FLAGS " -Wnull-dereference -Wdouble-promotion")
 string(APPEND CMAKE_CXX_FLAGS " -march=native -g")
 
-find_package(OpenSSL REQUIRED)
+find_package(OpenSSL CONFIG REQUIRED)
+
 find_package(Boost REQUIRED COMPONENTS headers)
 
 set(SOURCES
         src/WebSocketClient.cpp
+        src/MarketDataHandler.cpp
+        include/MarketDataHandler.hpp
+        include/MarketDepthMessage.hpp
+        include/Order.hpp
+        src/Order.cpp
+        src/MarketDepthMessage.cpp
+        include/OrderFactory.hpp
+        src/OrderFactory.cpp
 )
 
 add_executable(market_data ${SOURCES})

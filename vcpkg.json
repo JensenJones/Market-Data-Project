@@ -184,6 +184,6 @@
     "version>=" : "1.88.0"
   }, {
     "name" : "openssl",
-    "version>=" : "3.5.1"
+    "version>=" : "3.5.4"
   } ]
 }

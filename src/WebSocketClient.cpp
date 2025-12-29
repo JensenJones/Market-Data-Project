@@ -21,6 +21,8 @@
 #include <boost/thread.hpp>
 #include <openssl/ssl.h>
 
+#include "MarketDataHandler.hpp"
+
 
 namespace beast = boost::beast; // from <boost/beast.hpp>
 namespace http = beast::http; // from <boost/beast/http.hpp>
@@ -52,6 +54,7 @@ private:
     std::string text_;
     std::string endpoint_;
     strand ws_strand_;
+    MarketDataHandler marketDataHandler_;
 
 public:
     // Resolver and socket require an io_context
@@ -208,34 +211,34 @@ public:
         // Read single message
         ws_.async_read(
             buffer_,
-            boost::asio::bind_executor(ws_strand_, beast::bind_front_handler(&session::on_read, shared_from_this())));
+            boost::asio::bind_executor(
+                ws_strand_, beast::bind_front_handler(&session::on_read, shared_from_this())));
     }
 
-    void
-    on_read(
-        beast::error_code ec,
-        std::size_t bytes_transferred) {
+    void on_read(beast::error_code ec, std::size_t bytes_transferred) {
         boost::ignore_unused(bytes_transferred);
+        if (ec) return fail(ec, "read");
 
-        if (ec)
-            return fail(ec, "read");
-
-        // Print the messages
-        // make_printable interprets the bytes are characters and sends to output stream
-        std::cout << beast::make_printable(buffer_.data()) << " by thread ID:" << boost::this_thread::get_id() <<
-                std::endl;
-
-        // Clear the buffer
+        // Convert buffer_ -> string (exact bytes)
+        std::string message = beast::buffers_to_string(buffer_.data());
         buffer_.consume(buffer_.size());
 
-        // Read single message
+        if (message.at(19) == 'd') {
+            std::printf("message: %s", message.c_str());
+            MarketDepthMessage marketDepthMessage{message};
+            marketDataHandler_.consumeMarketData(marketDepthMessage);
+            marketDepthMessage.printMarketDepth();
+        }
+
         ws_.async_read(
             buffer_,
-            boost::asio::bind_executor(ws_strand_, beast::bind_front_handler(&session::on_read, shared_from_this())));
-        // beast::bind_front_handler(
-        //     &session::on_read,
-        //     shared_from_this()));
+            boost::asio::bind_executor(
+                ws_strand_,
+                beast::bind_front_handler(&session::on_read, shared_from_this())
+            )
+        );
     }
+
 
     // Check how to close when a signal handler is triggered? does the websocket auto close?
     void
@@ -244,7 +247,7 @@ public:
             return fail(ec, "close");
 
         // If we get here then the connection is closed gracefully
-        // The make_printable() function helps print a ConstBufferSequence
+        // The make_printable() function helps printMarketDepth a ConstBufferSequence
         std::cout << beast::make_printable(buffer_.data()) << std::endl;
     }
 };
@@ -257,7 +260,7 @@ int main(int argc, char **argv) {
         std::cerr <<
                 "Usage: websocket-client-async-ssl <host> <port> <text>\n" <<
                 "Example:\n" <<
-                "    stream.binance.com 9443 '{ \"method\": \"SUBSCRIBE\", \"params\": [ \"btcusdt@aggTrade\", \"btcusdt@depth\" ], \"id\": 1 }' \"/stream?streams=btcusdt@trade&timeUnit=MICROSECOND\" 1\n";
+                "    stream.binance.com 9443 '{ \"method\": \"SUBSCRIBE\", \"params\": [ \"btcusdt@aggTrade\", \"btcusdt@depth\" ], \"id\": 1 }' \"/stream?streams=btcusdt@trade&timeUnit=MILLISECOND\" 1\n";
         return EXIT_FAILURE;
     }
     auto const host = argv[1];
