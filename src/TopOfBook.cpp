@@ -1,4 +1,6 @@
 #include "TopOfBook.hpp"
+
+#include <utility>
 #include "nlohmann/json.hpp"
 
 using json = nlohmann::json;
@@ -23,4 +25,16 @@ TopOfBook::TopOfBook(const json& marketMessage) : updateId( marketMessage.at("u"
     bestBid.set_quantity(as_double(marketMessage, "B"));
     bestAsk.set_price(as_double(marketMessage, "a"));
     bestAsk.set_quantity(as_double(marketMessage, "A"));
+}
+
+TopOfBook::TopOfBook(const uint64_t updateId, std::string symbol, const Order &bestBid, const Order &bestAsk): updateId(updateId),
+                                                                                                               symbol(std::move(symbol)),
+                                                                                                               bestBid(bestBid),
+                                                                                                               bestAsk(bestAsk) {
+}
+
+std::ostream & operator<<(std::ostream &os, const TopOfBook &obj) {
+    return os
+           << "updateId: " << obj.updateId << ", symbol: " << obj.symbol << '\n'
+           << "Top of order book: " << obj.bestBid << " | " << obj.bestAsk;
 }

@@ -9,7 +9,7 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
 
 #string(APPEND CMAKE_CXX_FLAGS " -Wall -Werror -Wpedantic -Wshadow -Wconversion")
 #string(APPEND CMAKE_CXX_FLAGS " -Wnull-dereference -Wdouble-promotion")
-string(APPEND CMAKE_CXX_FLAGS " -march=native -g")
+string(APPEND CMAKE_CXX_FLAGS " -march=native -g") # may need -pthread
 
 find_package(OpenSSL CONFIG REQUIRED)
 
@@ -28,6 +28,7 @@ set(SOURCES
         include/TopOfBook.hpp
         src/TopOfBook.cpp
         include/MessageQueue.hpp
+        include/MessageQueueConsumer.hpp
 )
 
 add_executable(market_data ${SOURCES})

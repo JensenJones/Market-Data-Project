@@ -14,9 +14,11 @@ class TopOfBook {
 public:
     explicit TopOfBook(const nlohmann::json& marketMessage);
 
-    friend std::ostream & operator<<(std::ostream &os, const TopOfBook &obj) {
-        return os
-               << "updateId: " << obj.updateId << ", symbol: " << obj.symbol << '\n'
-               << "Top of order book: " << obj.bestBid << " | " << obj.bestAsk;
-    }
+    TopOfBook(const TopOfBook &other) = default;
+
+    TopOfBook(TopOfBook &&other) noexcept = default;
+
+    TopOfBook(uint64_t updateId, std::string symbol, const Order &bestBid, const Order &bestAsk);
+
+    friend std::ostream & operator<<(std::ostream &os, const TopOfBook &obj);
 };

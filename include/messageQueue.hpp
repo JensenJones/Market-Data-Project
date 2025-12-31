@@ -1,61 +1,59 @@
 #pragma once
-#include <iosfwd>
+#include <array>
 #include <concepts>
-#include <iostream>
-#include <print>
 
 namespace messageQueue {
-    template<typename T>
+    template<typename T, size_t CAPACITY>
     class MessageQueue {
-        std::vector<T> data;
-        std::vector<T>::iterator head;
-        std::vector<T>::iterator tail;
+        std::array<std::optional<T>, CAPACITY> data{};
 
-        size_t capacity;
-        size_t size;
+        size_t head{};
+        size_t tail{};
+        size_t size{};
 
     public:
-        explicit MessageQueue(size_t capacity) {
-            assert(capacity > 0);
+        using valueType = T;
 
-            data = std::vector<T>(capacity);
-            head = data.begin();
-            tail = data.begin();
+        template<typename U>
+        requires std::constructible_from<T, U&&>
+        void enqueue(U&& message);
+        std::optional<T> dequeue();
 
-            this->capacity = capacity;
-            size = 0;
-        }
-
-        void enqueue(T message);
-        T dequeue();
+        bool isEmpty() const;
+        bool isFull() const;
     };
 
-    template<typename T>
-    void MessageQueue<T>::enqueue(T message) {
-        if (size == capacity) return;
+    template<typename T, size_t CAPACITY>
+    template<typename U> requires std::constructible_from<T, U &&>
+    void MessageQueue<T, CAPACITY>::enqueue(U &&message) {
+        if (isFull()) return;
 
-        *head++ = message;
-        if (head == data.end()) {
-            head = data.begin();
-        }
+        data[head].emplace(std::forward<U>(message));
+        head = (head + 1) % CAPACITY;
         ++size;
+
+        std::cout << message << '\n';
     }
 
-    template<typename T>
-    T MessageQueue<T>::dequeue() {
-        if (size == 0) return T{};
+    template<typename T, size_t CAPACITY>
+    std::optional<T> MessageQueue<T, CAPACITY>::dequeue() {
+        if (isEmpty()) return std::nullopt;
 
-        T toReturn = *tail++;
-        if (tail == data.end()) {
-            tail = data.begin();
-        }
+        auto result = std::move(data[tail]);
+        data[tail].reset();
+        tail = (tail + 1) % CAPACITY;
         --size;
 
-        return toReturn;
+        return result;
+    }
+
+    template<typename T, size_t CAPACITY>
+    bool MessageQueue<T, CAPACITY>::isEmpty() const {
+        return size == 0;
+    }
+
+    template<typename T, size_t CAPACITY>
+    bool MessageQueue<T, CAPACITY>::isFull() const {
+        return size == CAPACITY;
     }
 }
-
-
-
-
-

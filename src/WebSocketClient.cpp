@@ -24,6 +24,7 @@
 
 #include "MarketDataHandler.hpp"
 #include "messageQueue.hpp"
+#include "MessageQueueConsumer.hpp"
 #include "TopOfBook.hpp"
 
 
@@ -49,6 +50,8 @@ fail(beast::error_code ec, char const *what) {
 // which is a handy function to create shared pointers from this
 class session : public std::enable_shared_from_this<session> {
 private:
+    constexpr static size_t QUEUE_MAX_SIZE = 1000;
+
     net::io_context &ioc_;
     tcp::resolver resolver_;
     websocket::stream<beast::ssl_stream<beast::tcp_stream> > ws_;
@@ -58,7 +61,20 @@ private:
     std::string endpoint_;
     strand ws_strand_;
     MarketDataHandler marketDataHandler_;
-    messageQueue::MessageQueue<TopOfBook> messageQueue;
+    using MessageQueueTOB = messageQueue::MessageQueue<TopOfBook, QUEUE_MAX_SIZE>;
+    MessageQueueTOB messageQueue_{};
+    std::vector<messageQueue::MessageQueueConsumer<MessageQueueTOB>> consumers_;
+    std::vector<std::jthread> consumerThreads_;
+
+    void startConsumers(const int n) {
+        consumers_.reserve(n);
+        consumerThreads_.reserve(n);
+
+        for (int i = 0; i < n; ++i) {
+            consumers_.emplace_back(messageQueue_);
+            consumerThreads_.emplace_back(consumers_.back());
+        }
+    }
 
 public:
     // Resolver and socket require an io_context
@@ -77,7 +93,10 @@ public:
         char const *host,
         char const *port,
         char const *text,
-        char const *endpoint) {
+        char const *endpoint,
+        const int numConsumers) {
+        startConsumers(numConsumers);
+
         // Save these for later
         host_ = host;
         text_ = text;
@@ -224,16 +243,11 @@ public:
         if (ec) return fail(ec, "read");
 
         if (std::string message = beast::buffers_to_string(buffer_.data()); message.length() > 30) { // Avoid invalid messages
-            messageQueue.enqueue(std::move(TopOfBook{nlohmann::json::parse(message)}));
+            messageQueue_.enqueue(std::move(TopOfBook{nlohmann::json::parse(message)}));
         }
         buffer_.consume(buffer_.size());
 
-        // // Market Depth Stream messages:
-        // if (message.at(19) == 'd') {
-        //     MarketDepthMessage marketDepthMessage{message};
-        //     marketDataHandler_.consumeMarketData(marketDepthMessage);
-        //     marketDepthMessage.printMarketDepth();
-        // }
+
 
         ws_.async_read(
             buffer_,
@@ -261,9 +275,9 @@ public:
 
 int main(int argc, char **argv) {
     // Check command line arguments.
-    if (argc != 6) {
+    if (argc != 7) {
         std::cerr <<
-                "Usage: websocket-client-async-ssl <host> <port> <text>\n" <<
+                "Usage: websocket-client-async-ssl <host> <port> <text> <num consumer threads>\n" <<
                 "Example:\n" <<
                 "    stream.binance.com 9443 '{ \"method\": \"SUBSCRIBE\", \"params\": [ \"btcusdt@aggTrade\", \"btcusdt@depth\" ], \"id\": 1 }' \"/stream?streams=btcusdt@trade&timeUnit=MILLISECOND\" 1\n";
         return EXIT_FAILURE;
@@ -275,6 +289,7 @@ int main(int argc, char **argv) {
     auto const port = argv[2];
     auto const text = argv[3];
     auto const endpoint = argv[4];
+    const int numConsumers = std::stoi(argv[6]);
     auto const threads = std::max<size_t>(1, static_cast<size_t>(std::strtol(argv[5], nullptr, 10)));
 
     // The io_context is required for all I/O
@@ -296,7 +311,7 @@ int main(int argc, char **argv) {
 
     // Launch the asynchronous operation
     // Create an instance of session and returns a shared  pointer to session
-    std::make_shared<session>(ioc, ctx)->run(host, port, text, endpoint);
+    std::make_shared<session>(ioc, ctx)->run(host, port, text, endpoint, numConsumers);
 
     // Run the I/O service on the requested number of threads
     std::vector<std::thread> v;
