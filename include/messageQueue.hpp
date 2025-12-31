@@ -32,8 +32,6 @@ namespace messageQueue {
         data[head].emplace(std::forward<U>(message));
         head = (head + 1) % CAPACITY;
         ++size;
-
-        std::cout << message << '\n';
     }
 
     template<typename T, size_t CAPACITY>

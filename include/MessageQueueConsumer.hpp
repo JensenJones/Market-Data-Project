@@ -25,11 +25,14 @@ namespace messageQueue {
     MessageQueueConsumer(MessageQueue<T, N>&) -> MessageQueueConsumer<MessageQueue<T, N>>;
 
 
+    std::mutex printingMutex{};
     template<typename Queue>
     void MessageQueueConsumer<Queue>::sendToProcessor(std::optional<valueType> dataOptional) {
         if (dataOptional) {
             auto value = dataOptional.value();
             // TODO: Send this to something to calculate statistics;
+            std::unique_lock lock(printingMutex);
+            std::cout << "In the Message consumer, message follows:\n" << value << '\n';
         }
     }
 
