@@ -7,16 +7,14 @@ namespace messageQueue {
 
         using valueType = typename Queue::valueType;
 
-        void sendToProcessor(valueType message);
+        void sendToProcessor(std::optional<valueType> dataOptional);
 
     public:
         explicit MessageQueueConsumer(Queue &queue);
 
-        void operator()(std::stop_token st) {
+        void operator()(const std::stop_token& st) {
             while (!st.stop_requested()) {
-                if (auto data = queue.dequeue()) {
-                    sendToProcessor(data.value());
-                }
+                sendToProcessor(queue.dequeue());
             }
         }
     };
@@ -28,8 +26,11 @@ namespace messageQueue {
 
 
     template<typename Queue>
-    void MessageQueueConsumer<Queue>::sendToProcessor(valueType message) {
-        // TODO: Send this to something to calculate statistics;
+    void MessageQueueConsumer<Queue>::sendToProcessor(std::optional<valueType> dataOptional) {
+        if (dataOptional) {
+            auto value = dataOptional.value();
+            // TODO: Send this to something to calculate statistics;
+        }
     }
 
     template<typename Queue>

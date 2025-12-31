@@ -2,6 +2,7 @@
 #include <array>
 #include <concepts>
 
+// TODO Make threadsafe
 namespace messageQueue {
     template<typename T, size_t CAPACITY>
     class MessageQueue {
