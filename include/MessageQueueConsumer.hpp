@@ -12,11 +12,7 @@ namespace messageQueue {
     public:
         explicit MessageQueueConsumer(Queue &queue);
 
-        void operator()(const std::stop_token& st) {
-            while (!st.stop_requested()) {
-                sendToProcessor(queue.dequeue());
-            }
-        }
+        void operator()(const std::stop_token& stopToken);
     };
     template<typename Queue>
     MessageQueueConsumer(Queue&) -> MessageQueueConsumer<Queue>;
@@ -39,4 +35,10 @@ namespace messageQueue {
     template<typename Queue>
     MessageQueueConsumer<Queue>::MessageQueueConsumer(Queue &queue): queue(queue) {}
 
+    template<typename Queue>
+    void MessageQueueConsumer<Queue>::operator()(const std::stop_token &stopToken) {
+        while (!stopToken.stop_requested()) {
+            sendToProcessor(queue.dequeue(stopToken));
+        }
+    }
 }

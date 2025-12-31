@@ -12,13 +12,16 @@ namespace messageQueue {
         size_t tail{};
         size_t size{};
 
+        std::mutex mutex;
+        std::condition_variable conditionVariable;
+
     public:
         using valueType = T;
 
         template<typename U>
         requires std::constructible_from<T, U&&>
         void enqueue(U&& message);
-        std::optional<T> dequeue();
+        std::optional<T> dequeue(const std::stop_token& stopToken);
 
         bool isEmpty() const;
         bool isFull() const;
@@ -27,21 +30,37 @@ namespace messageQueue {
     template<typename T, size_t CAPACITY>
     template<typename U> requires std::constructible_from<T, U &&>
     void MessageQueue<T, CAPACITY>::enqueue(U &&message) {
-        if (isFull()) return;
+        std::unique_lock lock{mutex};
+
+        while (isFull()) {
+            conditionVariable.wait(lock);
+        }
 
         data[head].emplace(std::forward<U>(message));
         head = (head + 1) % CAPACITY;
         ++size;
+
+        conditionVariable.notify_all();
     }
 
     template<typename T, size_t CAPACITY>
-    std::optional<T> MessageQueue<T, CAPACITY>::dequeue() {
-        if (isEmpty()) return std::nullopt;
+    std::optional<T> MessageQueue<T, CAPACITY>::dequeue(const std::stop_token& stopToken) {
+        std::unique_lock lock{mutex};
+
+        conditionVariable.wait(lock, [&] {
+            return stopToken.stop_requested() || size > 0;
+        });
+
+        if (stopToken.stop_requested()) {
+            return std::nullopt;
+        }
 
         auto result = std::move(data[tail]);
         data[tail].reset();
         tail = (tail + 1) % CAPACITY;
         --size;
+
+        conditionVariable.notify_all();
 
         return result;
     }
