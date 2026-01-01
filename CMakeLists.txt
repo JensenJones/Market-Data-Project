@@ -7,40 +7,56 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
 
-#string(APPEND CMAKE_CXX_FLAGS " -Wall -Werror -Wpedantic -Wshadow -Wconversion")
-#string(APPEND CMAKE_CXX_FLAGS " -Wnull-dereference -Wdouble-promotion")
 string(APPEND CMAKE_CXX_FLAGS " -march=native -g") # may need -pthread
 
 find_package(OpenSSL CONFIG REQUIRED)
 
 find_package(Boost REQUIRED COMPONENTS headers)
 
-set(SOURCES
+set(LIB_SOURCES
         src/WebSocketClient.cpp
-        src/MarketDataHandler.cpp
+        src/Order.cpp
+        src/MarketDepthMessage.cpp
+        src/OrderFactory.cpp
+        src/TopOfBook.cpp
+)
+
+set(HEADERS
         include/MarketDataHandler.hpp
         include/MarketDepthMessage.hpp
         include/Order.hpp
-        src/Order.cpp
-        src/MarketDepthMessage.cpp
         include/OrderFactory.hpp
-        src/OrderFactory.cpp
         include/TopOfBook.hpp
-        src/TopOfBook.cpp
-        include/MessageQueue.hpp
+        include/messageQueue.hpp
         include/MessageQueueConsumer.hpp
 )
 
-add_executable(market_data ${SOURCES})
+add_library(market_data_lib
+        ${LIB_SOURCES}
+        ${HEADERS}
+)
 
-target_link_libraries(market_data
-        PRIVATE
+target_include_directories(market_data_lib
+        PUBLIC
+        ${PROJECT_SOURCE_DIR}/include
+        ${Boost_INCLUDE_DIRS}
+)
+
+target_link_libraries(market_data_lib
+        PUBLIC
         OpenSSL::SSL
         OpenSSL::Crypto
 )
 
-target_include_directories(market_data
-    PRIVATE
-        ${PROJECT_SOURCE_DIR}/include
-        ${Boost_INCLUDE_DIRS}
+# app-only sources: main.cpp
+add_executable(market_data
+        src/main.cpp
 )
+
+target_link_libraries(market_data
+        PRIVATE
+        market_data_lib
+)
+
+enable_testing()
+add_subdirectory(tests)
