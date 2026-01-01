@@ -4,7 +4,8 @@
 
 class MessageQueueTest : public testing::Test {
 protected:
-    messageQueue::MessageQueue<int, 10> queue;
+    constexpr static size_t QUEUE_CAPACITY = 3;
+    messageQueue::MessageQueue<int, QUEUE_CAPACITY> queue;
     std::stop_source stopSource;
     std::stop_token token;
 
@@ -14,7 +15,29 @@ protected:
 };
 
 TEST_F(MessageQueueTest, shouldEnqueueAndDequeueSingleValue) {
-    queue.enqueue(42);
+    queue.enqueue(22);
     const int value = queue.dequeue(token).value();
-    EXPECT_EQ(value, 42);
+    EXPECT_EQ(value, 22);
+}
+
+TEST_F(MessageQueueTest, shouldEnqueueAndDequeueMultipleMessagesFIFO) {
+    queue.enqueue(1);
+    queue.enqueue(2);
+    queue.enqueue(3);
+
+    EXPECT_EQ(queue.isFull(), true);
+
+    auto first = queue.dequeue(token).value();
+    auto second = queue.dequeue(token).value();
+    auto third = queue.dequeue(token).value();
+
+    EXPECT_EQ(first, 1);
+    EXPECT_EQ(second, 2);
+    EXPECT_EQ(third, 3);
+}
+
+TEST_F(MessageQueueTest, shouldBlockOrdersExceedingCapacity) {
+    queue.enqueue(1);
+    queue.enqueue(2);
+
 }

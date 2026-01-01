@@ -4,6 +4,7 @@ namespace messageQueue {
     template<typename Queue>
     class MessageQueueConsumer {
         Queue& queue;
+        std::mutex printingMutex{};
 
         using valueType = typename Queue::valueType;
 
@@ -14,14 +15,13 @@ namespace messageQueue {
 
         void operator()(const std::stop_token& stopToken);
     };
+
     template<typename Queue>
     MessageQueueConsumer(Queue&) -> MessageQueueConsumer<Queue>;
 
     template<typename T, std::size_t N>
     MessageQueueConsumer(MessageQueue<T, N>&) -> MessageQueueConsumer<MessageQueue<T, N>>;
 
-
-    std::mutex printingMutex{};
     template<typename Queue>
     void MessageQueueConsumer<Queue>::sendToProcessor(std::optional<valueType> dataOptional) {
         if (dataOptional) {

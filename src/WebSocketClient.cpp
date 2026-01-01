@@ -14,10 +14,7 @@
 #include <memory>
 #include <string>
 #include <cstdio>
-#include <boost/asio/signal_set.hpp>
 #include <thread>
-#include <boost/asio.hpp>
-#include <boost/thread.hpp>
 #include <nlohmann/adl_serializer.hpp>
 #include <nlohmann/json.hpp>
 #include <openssl/ssl.h>
@@ -49,7 +46,6 @@ fail(beast::error_code ec, char const *what) {
 // enabled_shared_from_this provided function shared_from_this
 // which is a handy function to create shared pointers from this
 class session : public std::enable_shared_from_this<session> {
-private:
     constexpr static size_t QUEUE_MAX_SIZE = 1000;
 
     net::io_context &ioc_;
@@ -61,9 +57,12 @@ private:
     std::string endpoint_;
     strand ws_strand_;
     MarketDataHandler marketDataHandler_;
+
     using MessageQueueTOB = messageQueue::MessageQueue<TopOfBook, QUEUE_MAX_SIZE>;
+    using Consumer = messageQueue::MessageQueueConsumer<MessageQueueTOB>;
+
     MessageQueueTOB messageQueue_{};
-    std::vector<messageQueue::MessageQueueConsumer<MessageQueueTOB>> consumers_;
+    std::vector<std::unique_ptr<Consumer>> consumers_;
     std::vector<std::jthread> consumerThreads_;
 
     void startConsumers(const int n) {
@@ -71,8 +70,8 @@ private:
         consumerThreads_.reserve(n);
 
         for (int i = 0; i < n; ++i) {
-            consumers_.emplace_back(messageQueue_);
-            consumerThreads_.emplace_back(consumers_.back());
+            consumers_.emplace_back(std::make_unique<Consumer>(messageQueue_));
+            consumerThreads_.emplace_back(std::ref(*consumers_.back()));
         }
     }
 
@@ -170,9 +169,6 @@ public:
             ssl::stream_base::client,
             boost::asio::bind_executor(
                 ws_strand_, beast::bind_front_handler(&session::on_ssl_handshake, shared_from_this())));
-        // beast::bind_front_handler(
-        //     &session::on_ssl_handshake,
-        //     shared_from_this()));
     }
 
     void
@@ -180,8 +176,7 @@ public:
         if (ec)
             return fail(ec, "ssl_handshake");
 
-        // Turn off the timeout on the tcp_stream, because
-        // the websocket stream has its own timeout system.
+        // Turn off the timeout on the tcp_stream, because the websocket stream has its own timeout system.
         beast::get_lowest_layer(ws_).expires_never();
 
         // Set suggested timeout settings for the websocket
@@ -201,9 +196,6 @@ public:
         ws_.async_handshake(host_, endpoint_,
                             boost::asio::bind_executor(
                                 ws_strand_, beast::bind_front_handler(&session::on_handshake, shared_from_this())));
-        // beast::bind_front_handler(
-        //     &session::on_handshake,
-        //     shared_from_this()));
     }
 
     void
@@ -215,9 +207,6 @@ public:
         ws_.async_write(
             net::buffer(text_),
             boost::asio::bind_executor(ws_strand_, beast::bind_front_handler(&session::on_write, shared_from_this())));
-        // beast::bind_front_handler(
-        //     &session::on_write,
-        //     shared_from_this()));
     }
 
     void
@@ -266,7 +255,7 @@ public:
             return fail(ec, "close");
 
         // If we get here then the connection is closed gracefully
-        // The make_printable() function helps printMarketDepth a ConstBufferSequence
+        // The make_printable() function helps print a ConstBufferSequence
         std::cout << beast::make_printable(buffer_.data()) << std::endl;
     }
 };

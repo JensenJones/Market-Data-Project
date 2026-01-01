@@ -13,7 +13,7 @@ namespace messageQueue {
         size_t size{};
 
         std::mutex mutex;
-        std::condition_variable conditionVariable;
+        std::condition_variable_any conditionVariable;
 
     public:
         using valueType = T;
@@ -23,8 +23,8 @@ namespace messageQueue {
         void enqueue(U&& message);
         std::optional<T> dequeue(const std::stop_token& stopToken);
 
-        bool isEmpty() const;
-        bool isFull() const;
+        [[nodiscard]] bool isEmpty() const;
+        [[nodiscard]] bool isFull() const;
     };
 
     template<typename T, size_t CAPACITY>
@@ -47,11 +47,11 @@ namespace messageQueue {
     std::optional<T> MessageQueue<T, CAPACITY>::dequeue(const std::stop_token& stopToken) {
         std::unique_lock lock{mutex};
 
-        conditionVariable.wait(lock, [&] {
-            return stopToken.stop_requested() || size > 0;
+        conditionVariable.wait(lock, stopToken, [&] {
+            return size > 0;
         });
 
-        if (stopToken.stop_requested()) {
+        if (stopToken.stop_requested() && size == 0) {
             return std::nullopt;
         }
 
