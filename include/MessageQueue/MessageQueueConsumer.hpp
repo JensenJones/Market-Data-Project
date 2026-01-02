@@ -4,7 +4,7 @@ namespace messageQueue {
     template<typename Queue>
     class MessageQueueConsumer {
         Queue& queue;
-        std::mutex printingMutex{};
+        inline static std::mutex printingMutex{};
 
         using valueType = Queue::valueType;
 

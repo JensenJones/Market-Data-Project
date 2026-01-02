@@ -19,7 +19,6 @@
 #include <nlohmann/json.hpp>
 #include <openssl/ssl.h>
 
-#include "MarketDataHandler.hpp"
 #include "../../include/MessageQueue/MessageQueue.hpp"
 #include "../../include/MessageQueue/MessageQueueConsumer.hpp"
 #include "../../include/MessageHandling/TopOfBook.hpp"
@@ -56,7 +55,6 @@ class session : public std::enable_shared_from_this<session> {
     std::string text_;
     std::string endpoint_;
     strand ws_strand_;
-    MarketDataHandler marketDataHandler_;
 
     using MessageQueueTOB = messageQueue::MessageQueue<TopOfBook, QUEUE_MAX_SIZE>;
     using Consumer = messageQueue::MessageQueueConsumer<MessageQueueTOB>;
@@ -235,8 +233,6 @@ public:
             messageQueue_.enqueue(std::move(TopOfBook{nlohmann::json::parse(message)}));
         }
         buffer_.consume(buffer_.size());
-
-
 
         ws_.async_read(
             buffer_,
