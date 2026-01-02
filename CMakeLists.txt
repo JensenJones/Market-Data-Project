@@ -14,21 +14,20 @@ find_package(OpenSSL CONFIG REQUIRED)
 find_package(Boost REQUIRED COMPONENTS headers)
 
 set(LIB_SOURCES
-        src/WebSocketClient.cpp
-        src/Order.cpp
-        src/MarketDepthMessage.cpp
-        src/OrderFactory.cpp
-        src/TopOfBook.cpp
+        src/WebConnection/WebSocketClient.cpp
+        src/MessageHandling/Order.cpp
+        src/MessageHandling/MarketDepthMessage.cpp
+        src/MessageHandling/OrderFactory.cpp
+        src/MessageHandling/TopOfBook.cpp
 )
 
 set(HEADERS
-        include/MarketDataHandler.hpp
-        include/MarketDepthMessage.hpp
-        include/Order.hpp
-        include/OrderFactory.hpp
-        include/TopOfBook.hpp
-        include/messageQueue.hpp
-        include/MessageQueueConsumer.hpp
+        include/MessageHandling/MarketDepthMessage.hpp
+        include/MessageHandling/Order.hpp
+        include/MessageHandling/OrderFactory.hpp
+        include/MessageHandling/TopOfBook.hpp
+        include/MessageQueue/MessageQueue.hpp
+        include/MessageQueue/MessageQueueConsumer.hpp
 )
 
 add_library(market_data_lib

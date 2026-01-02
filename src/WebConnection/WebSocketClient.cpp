@@ -20,9 +20,9 @@
 #include <openssl/ssl.h>
 
 #include "MarketDataHandler.hpp"
-#include "MessageQueue.hpp"
-#include "MessageQueueConsumer.hpp"
-#include "TopOfBook.hpp"
+#include "../../include/MessageQueue/MessageQueue.hpp"
+#include "../../include/MessageQueue/MessageQueueConsumer.hpp"
+#include "../../include/MessageHandling/TopOfBook.hpp"
 
 
 namespace beast = boost::beast; // from <boost/beast.hpp>
