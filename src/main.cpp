@@ -64,12 +64,9 @@ int main(int argc, char **argv) {
     // Run the I/O service on the requested number of threads
     std::vector<std::thread> v;
     v.reserve(threads - 1);
-    for (auto i = threads - 1; i > 0; --i)
-        // Create an instance in place at the end of the vector
-        v.emplace_back(
-            [&ioc] {
-                ioc.run();
-            });
+    for (auto i = 1; i < threads; ++i)
+        v.emplace_back([&ioc] {ioc.run();});
+
     ioc.run();
 
     // (If we get here, it means we got a SIGINT or SIGTERM)

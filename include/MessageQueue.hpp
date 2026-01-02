@@ -1,6 +1,7 @@
 #pragma once
 #include <array>
 #include <concepts>
+#include <condition_variable>
 
 // TODO Make threadsafe
 namespace messageQueue {

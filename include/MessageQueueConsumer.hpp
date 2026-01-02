@@ -6,7 +6,7 @@ namespace messageQueue {
         Queue& queue;
         std::mutex printingMutex{};
 
-        using valueType = typename Queue::valueType;
+        using valueType = Queue::valueType;
 
         void sendToProcessor(std::optional<valueType> dataOptional);
 
