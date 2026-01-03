@@ -38,6 +38,11 @@ set(HEADERS
         include/DataProcessing/Greek.hpp
         src/DataProcessing/BidAskVolumeRatio.cpp
         include/DataProcessing/BidAskVolumeRatio.hpp
+        include/Order/Order.cpp
+        include/Order/Order.hpp
+        include/Order/OrderSide.hpp
+        include/Order/OrderType.hpp
+        include/Order/OrderExpiry.hpp
 )
 
 add_library(market_data_lib
