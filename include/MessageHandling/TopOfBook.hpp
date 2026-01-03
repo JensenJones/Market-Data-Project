@@ -21,4 +21,20 @@ public:
     TopOfBook(uint64_t updateId, std::string symbol, const Order &bestBid, const Order &bestAsk);
 
     friend std::ostream & operator<<(std::ostream &os, const TopOfBook &obj);
+
+    [[nodiscard]] uint64_t getUpdateId() const {
+        return updateId;
+    }
+
+    [[nodiscard]] std::string getSymbol() const {
+        return symbol;
+    }
+
+    [[nodiscard]] Order getBestBid() const {
+        return bestBid;
+    }
+
+    [[nodiscard]] Order getBestAsk() const {
+        return bestAsk;
+    }
 };

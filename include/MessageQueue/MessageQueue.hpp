@@ -3,7 +3,6 @@
 #include <concepts>
 #include <condition_variable>
 
-// TODO Make threadsafe
 namespace messageQueue {
     template<typename T, size_t CAPACITY>
     class MessageQueue {

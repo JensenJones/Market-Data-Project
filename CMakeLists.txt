@@ -19,6 +19,11 @@ set(LIB_SOURCES
         src/MessageHandling/MarketDepthMessage.cpp
         src/MessageHandling/OrderFactory.cpp
         src/MessageHandling/TopOfBook.cpp
+        include/DataProcessing/DataProcessor.hpp
+        src/DataProcessing/DataProcessor.cpp
+        include/DataProcessing/Greek.hpp
+        src/DataProcessing/BidAskVolumeRatioTests.cpp
+        include/DataProcessing/BidAskVolumeRatioTests.hpp
 )
 
 set(HEADERS
@@ -28,6 +33,11 @@ set(HEADERS
         include/MessageHandling/TopOfBook.hpp
         include/MessageQueue/MessageQueue.hpp
         include/MessageQueue/MessageQueueConsumer.hpp
+        include/DataProcessing/DataProcessor.hpp
+        src/DataProcessing/DataProcessor.cpp
+        include/DataProcessing/Greek.hpp
+        src/DataProcessing/BidAskVolumeRatioTests.cpp
+        include/DataProcessing/BidAskVolumeRatioTests.hpp
 )
 
 add_library(market_data_lib

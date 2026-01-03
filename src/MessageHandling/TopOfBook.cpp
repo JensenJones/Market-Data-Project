@@ -5,16 +5,6 @@
 
 using json = nlohmann::json;
 
-// payload:
-// {
-//     "u":400900217,     // order book updateId    // int
-//     "s":"BNBUSDT",     // symbol                 // string
-//     "b":"25.35190000", // best bid price         // double
-//     "B":"31.21000000", // best bid qty           // ..
-//     "a":"25.36520000", // best ask price         // ..
-//     "A":"40.66000000"  // best ask qty           // ..
-//   }
-
 double as_double(const json& j, const std::string& key) {
     return std::stod(j.at(key).get<std::string>());
 }

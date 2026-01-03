@@ -22,6 +22,7 @@
 #include "../../include/MessageQueue/MessageQueue.hpp"
 #include "../../include/MessageQueue/MessageQueueConsumer.hpp"
 #include "../../include/MessageHandling/TopOfBook.hpp"
+#include "DataProcessing/BidAskVolumeRatioTests.hpp"
 
 
 namespace beast = boost::beast; // from <boost/beast.hpp>
@@ -60,6 +61,7 @@ class session : public std::enable_shared_from_this<session> {
     using Consumer = messageQueue::MessageQueueConsumer<MessageQueueTOB>;
 
     MessageQueueTOB messageQueue_{};
+    dataProcessing::DataProcessor dataProcessor_{};
     std::vector<std::unique_ptr<Consumer>> consumers_;
     std::vector<std::jthread> consumerThreads_;
 
@@ -68,7 +70,7 @@ class session : public std::enable_shared_from_this<session> {
         consumerThreads_.reserve(n);
 
         for (int i = 0; i < n; ++i) {
-            consumers_.emplace_back(std::make_unique<Consumer>(messageQueue_));
+            consumers_.emplace_back(std::make_unique<Consumer>(messageQueue_, dataProcessor_));
             consumerThreads_.emplace_back(std::ref(*consumers_.back()));
         }
     }
@@ -93,6 +95,7 @@ public:
         char const *endpoint,
         const int numConsumers) {
         startConsumers(numConsumers);
+        dataProcessor_.addGreek(std::make_unique<dataProcessing::BidAskVolumeRatioTests>(40));
 
         // Save these for later
         host_ = host;

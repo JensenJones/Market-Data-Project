@@ -4,11 +4,12 @@ find_package(GTest REQUIRED)
 
 include_directories(${GTEST_INCLUDE_DIRS})
 
-add_executable(MessageQueueTests
-        MessageQueueTests.cpp
+add_executable(Tests
+        MessageQueue/MessageQueueTests.cpp
+        DataProcessing/BidAskVolumeRatioTests.cpp
 )
 
-target_link_libraries(MessageQueueTests
+target_link_libraries(Tests
         PRIVATE
         market_data_lib
         GTest::gtest
@@ -16,9 +17,9 @@ target_link_libraries(MessageQueueTests
         Threads::Threads
 )
 
-target_include_directories(MessageQueueTests
+target_include_directories(Tests
         PRIVATE
         ${PROJECT_SOURCE_DIR}/include
 )
 
-add_test(NAME MessageQueueTests COMMAND MessageQueueTests)
+add_test(NAME Tests COMMAND Tests)
