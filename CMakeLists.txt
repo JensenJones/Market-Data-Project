@@ -22,8 +22,8 @@ set(LIB_SOURCES
         include/DataProcessing/DataProcessor.hpp
         src/DataProcessing/DataProcessor.cpp
         include/DataProcessing/Greek.hpp
-        src/DataProcessing/BidAskVolumeRatioTests.cpp
-        include/DataProcessing/BidAskVolumeRatioTests.hpp
+        src/DataProcessing/BidAskVolumeRatio.cpp
+        include/DataProcessing/BidAskVolumeRatio.hpp
 )
 
 set(HEADERS
@@ -36,8 +36,8 @@ set(HEADERS
         include/DataProcessing/DataProcessor.hpp
         src/DataProcessing/DataProcessor.cpp
         include/DataProcessing/Greek.hpp
-        src/DataProcessing/BidAskVolumeRatioTests.cpp
-        include/DataProcessing/BidAskVolumeRatioTests.hpp
+        src/DataProcessing/BidAskVolumeRatio.cpp
+        include/DataProcessing/BidAskVolumeRatio.hpp
 )
 
 add_library(market_data_lib

@@ -22,7 +22,7 @@
 #include "../../include/MessageQueue/MessageQueue.hpp"
 #include "../../include/MessageQueue/MessageQueueConsumer.hpp"
 #include "../../include/MessageHandling/TopOfBook.hpp"
-#include "DataProcessing/BidAskVolumeRatioTests.hpp"
+#include "DataProcessing/BidAskVolumeRatio.hpp"
 
 
 namespace beast = boost::beast; // from <boost/beast.hpp>
@@ -95,7 +95,7 @@ public:
         char const *endpoint,
         const int numConsumers) {
         startConsumers(numConsumers);
-        dataProcessor_.addGreek(std::make_unique<dataProcessing::BidAskVolumeRatioTests>(40));
+        dataProcessor_.addGreek(std::make_unique<dataProcessing::BidAskVolumeRatio>(40));
 
         // Save these for later
         host_ = host;

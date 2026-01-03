@@ -4,7 +4,7 @@
 #include "Greek.hpp"
 
 namespace dataProcessing {
-    class BidAskVolumeRatioTests : public Greek {
+    class BidAskVolumeRatio : public Greek {
         uint16_t lookback;
         std::deque<std::pair<double, double>> historicData;
         double ratio{};
@@ -15,7 +15,7 @@ namespace dataProcessing {
 
         void update(double newBidQuantity, double newAskQuantity);
     public:
-        explicit BidAskVolumeRatioTests(uint16_t lookback);
+        explicit BidAskVolumeRatio(uint16_t lookback);
         void update(const TopOfBook& topOfBook) override;
 
         [[nodiscard]] double getGreek() const override;

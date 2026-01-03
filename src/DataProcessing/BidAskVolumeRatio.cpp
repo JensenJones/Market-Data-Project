@@ -1,13 +1,13 @@
-#include "DataProcessing/BidAskVolumeRatioTests.hpp"
+#include "DataProcessing/BidAskVolumeRatio.hpp"
 
 #include <iostream>
 
 namespace dataProcessing {
-    void BidAskVolumeRatioTests::updateRatio() {
-        ratio = bidVol / std::max(askVol, 0.000001L);
+    void BidAskVolumeRatio::updateRatio() {
+        ratio = bidVol / std::max(askVol, 1e-6L);
     }
 
-    void BidAskVolumeRatioTests::update(double newBidQuantity, double newAskQuantity) {
+    void BidAskVolumeRatio::update(double newBidQuantity, double newAskQuantity) {
         historicData.emplace_back(newBidQuantity, newAskQuantity);
         bidVol += newBidQuantity;
         askVol += newAskQuantity;
@@ -23,15 +23,13 @@ namespace dataProcessing {
         updateRatio();
     }
 
-    BidAskVolumeRatioTests::BidAskVolumeRatioTests(const uint16_t lookback) : lookback{ lookback } {}
+    BidAskVolumeRatio::BidAskVolumeRatio(const uint16_t lookback) : lookback{ lookback } {}
 
-    void BidAskVolumeRatioTests::update(const TopOfBook &topOfBook) {
+    void BidAskVolumeRatio::update(const TopOfBook &topOfBook) {
         update(topOfBook.getBestBid().getQuantity(), topOfBook.getBestAsk().getQuantity());
-
-        std::cout << "Ratio -- " << ratio << '\n';
     }
 
-    double BidAskVolumeRatioTests::getGreek() const {
+    double BidAskVolumeRatio::getGreek() const {
         return ratio;
     }
 }
