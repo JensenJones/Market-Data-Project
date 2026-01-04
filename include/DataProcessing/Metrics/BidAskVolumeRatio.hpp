@@ -1,10 +1,10 @@
 #pragma once
 #include <deque>
 
-#include "Greek.hpp"
+#include "Metric.hpp"
 
 namespace dataProcessing {
-    class BidAskVolumeRatio : public Greek {
+    class BidAskVolumeRatio : public Metric {
         uint16_t lookback;
         std::deque<std::pair<double, double>> historicData;
         double ratio{};

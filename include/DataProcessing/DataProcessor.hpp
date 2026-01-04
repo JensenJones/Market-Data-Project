@@ -2,9 +2,9 @@
 #include <string>
 #include <utility>
 
-#include "Greeks/Greek.hpp"
+#include "Metrics/Metric.hpp"
 #include "../MessageHandling/TopOfBook.hpp"
-#include "Greeks/GreekName.hpp"
+#include "Metrics/MetricName.hpp"
 
 namespace dataProcessing {
 
@@ -17,7 +17,7 @@ namespace dataProcessing {
     class DataProcessor {
         const std::string symbol;
         uint64_t latestUpdateId{};
-        std::unordered_map<GreekName, std::unique_ptr<Greek>> greeks;
+        std::unordered_map<MetricName, std::unique_ptr<Metric>> metrics;
         const Queue& tradeQueue;
 
         using valueType = Queue::valueType;
@@ -32,7 +32,7 @@ namespace dataProcessing {
         DataProcessor(std::string symbol, Queue& tradeQueue);
         void processData(const TopOfBook& topOfBook) const;
 
-        void addGreek(GreekName greekName, std::unique_ptr<Greek> greek);
+        void addMetric(MetricName greekName, std::unique_ptr<Metric> greek);
     };
 
     template<EnqueueQueue Queue>
@@ -42,7 +42,7 @@ namespace dataProcessing {
 
     template<EnqueueQueue Queue>
     void DataProcessor<Queue>::updateGreeks(const TopOfBook &topOfBook) const {
-        for (const auto &greek: greeks | std::views::values) {
+        for (const auto &greek: metrics | std::views::values) {
             greek->update(topOfBook);
         }
     }
@@ -78,7 +78,7 @@ namespace dataProcessing {
     }
 
     template<EnqueueQueue Queue>
-    void DataProcessor<Queue>::addGreek(const GreekName greekName, std::unique_ptr<Greek> greek) {
-        greeks[greekName] = std::move(greek);
+    void DataProcessor<Queue>::addMetric(const MetricName greekName, std::unique_ptr<Metric> greek) {
+        metrics[greekName] = std::move(greek);
     }
 }

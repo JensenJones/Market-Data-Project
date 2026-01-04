@@ -3,9 +3,9 @@
 #include "../../MessageHandling/TopOfBook.hpp"
 
 namespace dataProcessing {
-    class Greek {
+    class Metric {
     public:
-        virtual ~Greek() = default;
+        virtual ~Metric() = default;
         virtual void update(const TopOfBook& topOfBook) = 0;
         [[nodiscard]] virtual double getGreek() const = 0;
     };

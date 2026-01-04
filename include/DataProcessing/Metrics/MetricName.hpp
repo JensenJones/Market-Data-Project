@@ -1,6 +1,6 @@
 #pragma once
 
-enum class GreekName {
+enum class MetricName {
     BID_ASK_VOLUME_RATIO,
 
 };

@@ -1,7 +1,7 @@
 /**
  * TODO:
- * Create simple market greeks
- * Interface for combining the greeks and trading based on boolean combination of them
+ * Create simple market metrics
+ * Interface for combining the metrics and trading based on boolean combination of them
  * Interchangeability of markets while running.
  **/
 
@@ -22,7 +22,7 @@
 #include "../../include/MessageQueue/MessageQueue.hpp"
 #include "../../include/MessageQueue/MessageQueueConsumer.hpp"
 #include "../../include/MessageHandling/TopOfBook.hpp"
-#include "../../include/DataProcessing/Greeks/BidAskVolumeRatio.hpp"
+#include "../../include/DataProcessing/Metrics/BidAskVolumeRatio.hpp"
 
 
 namespace beast = boost::beast; // from <boost/beast.hpp>
@@ -101,7 +101,7 @@ public:
         char const *endpoint,
         const int numConsumers) {
         startConsumers(numConsumers);
-        dataProcessor_.addGreek(GreekName::BID_ASK_VOLUME_RATIO,
+        dataProcessor_.addMetric(MetricName::BID_ASK_VOLUME_RATIO,
             std::make_unique<dataProcessing::BidAskVolumeRatio>(40));
 
         // Save these for later
