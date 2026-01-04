@@ -12,40 +12,47 @@ namespace messageQueue {
             { q.dequeue(st) } -> std::same_as<std::optional<typename Queue::valueType>>;
         };
 
-    template<QueueConcept Queue>
+    template<typename Processor, typename Msg>
+    concept ProcessorConcept = requires(Processor& p, const Msg& msg) {
+        { p.processData(msg) }; // we don't care about return type
+    };
+
+    template<QueueConcept Queue, typename Processor>
+    requires ProcessorConcept<Processor, typename Queue::valueType>
     class MessageQueueConsumer {
-        using DataProcessor = dataProcessing::DataProcessor<Queue>;
         Queue& queue;
-        DataProcessor& dataProcessor;
+        Processor& dataProcessor;
         inline static std::mutex printingMutex{};
 
         using valueType = Queue::valueType;
 
         void sendToProcessor(std::optional<valueType> dataOptional);
 
-
     public:
-        explicit MessageQueueConsumer(Queue &queue, DataProcessor& dataProcessor);
+        explicit MessageQueueConsumer(Queue &queue, Processor& dataProcessor);
 
         void operator()(const std::stop_token& stopToken);
     };
 
-    template<QueueConcept Queue>
-    MessageQueueConsumer<Queue>::MessageQueueConsumer(Queue &queue, DataProcessor& dataProcessor) :
+    template<QueueConcept Queue, typename Processor>
+    requires ProcessorConcept<Processor, typename Queue::valueType>
+    MessageQueueConsumer<Queue, Processor>::MessageQueueConsumer(Queue &queue, Processor& dataProcessor) :
         queue(queue),
         dataProcessor(dataProcessor) {
     }
 
-    template<QueueConcept Queue>
-    void MessageQueueConsumer<Queue>::sendToProcessor(std::optional<valueType> dataOptional) {
+    template<QueueConcept Queue, typename Processor>
+    requires ProcessorConcept<Processor, typename Queue::valueType>
+    void MessageQueueConsumer<Queue, Processor>::sendToProcessor(std::optional<valueType> dataOptional) {
         if (dataOptional) {
             std::unique_lock lock(printingMutex);
             dataProcessor.processData(dataOptional.value());
         }
     }
 
-    template<QueueConcept Queue>
-    void MessageQueueConsumer<Queue>::operator()(const std::stop_token &stopToken) {
+    template<QueueConcept Queue, typename Processor>
+    requires ProcessorConcept<Processor, typename Queue::valueType>
+    void MessageQueueConsumer<Queue, Processor>::operator()(const std::stop_token &stopToken) {
         while (!stopToken.stop_requested()) {
             sendToProcessor(queue.dequeue(stopToken));
         }

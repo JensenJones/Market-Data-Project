@@ -22,7 +22,7 @@
 #include "../../include/MessageQueue/MessageQueue.hpp"
 #include "../../include/MessageQueue/MessageQueueConsumer.hpp"
 #include "../../include/MessageHandling/TopOfBook.hpp"
-#include "DataProcessing/BidAskVolumeRatio.hpp"
+#include "../../include/DataProcessing/Greeks/BidAskVolumeRatio.hpp"
 
 
 namespace beast = boost::beast; // from <boost/beast.hpp>
@@ -46,7 +46,8 @@ fail(beast::error_code ec, char const *what) {
 // enabled_shared_from_this provided function shared_from_this
 // which is a handy function to create shared pointers from this
 class session : public std::enable_shared_from_this<session> {
-    constexpr static size_t QUEUE_MAX_SIZE = 1000;
+    constexpr static size_t TOB_QUEUE_MAX_SIZE = 1000;
+    constexpr static size_t ORDER_QUEUE_MAX_SIZE = 1000;
 
     net::io_context &ioc_;
     tcp::resolver resolver_;
@@ -57,20 +58,25 @@ class session : public std::enable_shared_from_this<session> {
     std::string endpoint_;
     strand ws_strand_;
 
-    using MessageQueueTOB = messageQueue::MessageQueue<TopOfBook, QUEUE_MAX_SIZE>;
-    using Consumer = messageQueue::MessageQueueConsumer<MessageQueueTOB>;
+    using TobMessageQueue = messageQueue::MessageQueue<TopOfBook, TOB_QUEUE_MAX_SIZE>;
+    using OrderMessageQueue = messageQueue::MessageQueue<Order, ORDER_QUEUE_MAX_SIZE>;
+    using DataProcessor = dataProcessing::DataProcessor<OrderMessageQueue>;
+    using TobQueueConsumer = messageQueue::MessageQueueConsumer<TobMessageQueue, DataProcessor>;
 
-    MessageQueueTOB messageQueue_{};
-    dataProcessing::DataProcessor dataProcessor_{};
-    std::vector<std::unique_ptr<Consumer>> consumers_;
+    TobMessageQueue tobMessageQueue_{};
+    std::vector<std::unique_ptr<TobQueueConsumer>> consumers_;
     std::vector<std::jthread> consumerThreads_;
+
+    OrderMessageQueue orderMessageQueue_{};
+    dataProcessing::DataProcessor<OrderMessageQueue> dataProcessor_{"btcusdt",
+        orderMessageQueue_}; // TODO: Make symbol dynamic
 
     void startConsumers(const int n) {
         consumers_.reserve(n);
         consumerThreads_.reserve(n);
 
         for (int i = 0; i < n; ++i) {
-            consumers_.emplace_back(std::make_unique<Consumer>(messageQueue_, dataProcessor_));
+            consumers_.emplace_back(std::make_unique<TobQueueConsumer>(tobMessageQueue_, dataProcessor_));
             consumerThreads_.emplace_back(std::ref(*consumers_.back()));
         }
     }
@@ -95,7 +101,8 @@ public:
         char const *endpoint,
         const int numConsumers) {
         startConsumers(numConsumers);
-        dataProcessor_.addGreek(std::make_unique<dataProcessing::BidAskVolumeRatio>(40));
+        dataProcessor_.addGreek(GreekName::BID_ASK_VOLUME_RATIO,
+            std::make_unique<dataProcessing::BidAskVolumeRatio>(40));
 
         // Save these for later
         host_ = host;
@@ -233,7 +240,7 @@ public:
         if (ec) return fail(ec, "read");
 
         if (std::string message = beast::buffers_to_string(buffer_.data()); message.length() > 30) { // Avoid invalid messages
-            messageQueue_.enqueue(std::move(TopOfBook{nlohmann::json::parse(message)}));
+            tobMessageQueue_.enqueue(std::move(TopOfBook{nlohmann::json::parse(message)}));
         }
         buffer_.consume(buffer_.size());
 

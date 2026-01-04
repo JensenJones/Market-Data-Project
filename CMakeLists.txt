@@ -20,10 +20,9 @@ set(LIB_SOURCES
         src/MessageHandling/OrderFactory.cpp
         src/MessageHandling/TopOfBook.cpp
         include/DataProcessing/DataProcessor.hpp
-        src/DataProcessing/DataProcessor.cpp
-        include/DataProcessing/Greek.hpp
+        include/DataProcessing/Greeks/Greek.hpp
         src/DataProcessing/BidAskVolumeRatio.cpp
-        include/DataProcessing/BidAskVolumeRatio.hpp
+        include/DataProcessing/Greeks/BidAskVolumeRatio.hpp
 )
 
 set(HEADERS
@@ -34,15 +33,15 @@ set(HEADERS
         include/MessageQueue/MessageQueue.hpp
         include/MessageQueue/MessageQueueConsumer.hpp
         include/DataProcessing/DataProcessor.hpp
-        src/DataProcessing/DataProcessor.cpp
-        include/DataProcessing/Greek.hpp
+        include/DataProcessing/Greeks/Greek.hpp
         src/DataProcessing/BidAskVolumeRatio.cpp
-        include/DataProcessing/BidAskVolumeRatio.hpp
-        include/Order/Order.cpp
+        include/DataProcessing/Greeks/BidAskVolumeRatio.hpp
+        src/Order/Order.cpp
         include/Order/Order.hpp
         include/Order/OrderSide.hpp
         include/Order/OrderType.hpp
         include/Order/OrderExpiry.hpp
+        include/DataProcessing/Greeks/GreekName.hpp
 )
 
 add_library(market_data_lib

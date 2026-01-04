@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../MessageHandling/TopOfBook.hpp"
+#include "../../MessageHandling/TopOfBook.hpp"
 
 namespace dataProcessing {
     class Greek {

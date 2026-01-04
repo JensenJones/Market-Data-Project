@@ -20,8 +20,8 @@
 namespace Order {
     class Order {
     public:
-        Order(const std::string &symbol, OrderSide side, OrderType type, OrderExpiry expiry,
-              long double quantity, long double price, long double timestamp);
+        Order(std::string symbol, OrderSide side, OrderType type, OrderExpiry expiry,
+              long double quantity, long double price, uint64_t recvWindow, uint64_t timestamp);
 
     private:
         const std::string symbol;
@@ -30,15 +30,11 @@ namespace Order {
         const OrderExpiry expiry;
         const long double quantity;
         const long double price;
-        const long double timestamp;
+        const uint64_t recvWindow;
+        const uint64_t timestamp;
 
     public:
-        std::string convertToPayload() {
-            // TODO https://developers.binance.com/docs/fiat/general-info#place-new-order-trade
-            return "";
-        }
+        std::string convertToPayload();
     };
-
-
 }
 
